@@ -130,6 +130,7 @@
                         <i data-lucide="search-code" class="empty-icon"></i>
                         <h3>No release notes found</h3>
                         <p>Try refining your search query or changing filters.</p>
+                        <button id="clear-all-filters-btn" class="btn btn-secondary mt-3">Reset All Filters</button>
                     </div>
 
                     <div id="error-state" class="state-container error" style="display: none;">
@@ -191,6 +192,14 @@
                             </div>
 
                             <div class="tab-content" id="tab-compose">
+                                <div class="template-selector-container">
+                                    <span class="section-sub-title">Template Style</span>
+                                    <div class="template-selector">
+                                        <button class="template-btn active" data-style="professional">Professional</button>
+                                        <button class="template-btn" data-style="bullets">Bullet Points</button>
+                                        <button class="template-btn" data-style="hype">Hype</button>
+                                    </div>
+                                </div>
                                 <div class="textarea-wrapper">
                                     <textarea id="tweet-textarea" rows="7" placeholder="Draft your tweet..."></textarea>
                                     <div class="textarea-actions">

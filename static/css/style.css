@@ -1339,3 +1339,52 @@ body.light-theme .card-action-btn:hover {
     color: var(--accent-green) !important;
     border-color: var(--accent-green) !important;
 }
+
+/* ==========================================================================
+   Template Selector Styles
+   ========================================================================== */
+.template-selector-container {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.template-selector {
+    display: flex;
+    background: var(--bg-base);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 4px;
+}
+
+.template-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: var(--transition-fast);
+    text-align: center;
+}
+
+.template-btn:hover {
+    color: var(--text-primary);
+}
+
+.template-btn.active {
+    background: var(--bg-surface-active);
+    color: var(--accent-blue);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+body.light-theme .template-btn.active {
+    background: var(--bg-surface);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}

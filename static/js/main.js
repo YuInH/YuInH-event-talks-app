@@ -6,6 +6,7 @@ let activeCategory = 'all';
 let searchQuery = '';
 let activeSort = 'newest';
 let lastFetchedTime = null;
+let selectedTemplateStyle = 'professional';
 
 // DOM Elements
 const refreshBtn = document.getElementById('refresh-btn');
@@ -285,6 +286,15 @@ function selectReleaseNote(item) {
     
     // Store current item data in elements for reset capability
     composerWorkspace.dataset.currentItem = JSON.stringify(item);
+
+    // Highlight active template style button
+    const templateButtons = document.querySelectorAll('.template-btn');
+    templateButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.style === selectedTemplateStyle) {
+            btn.classList.add('active');
+        }
+    });
     
     // Show Composer Workspace
     composerEmptyState.style.display = 'none';
@@ -325,19 +335,26 @@ function closeComposer() {
    Tweet Composition & Truncation Engine
    ========================================================================== */
 function generateDefaultTweet(item) {
+    if (selectedTemplateStyle === 'bullets') {
+        return generateBulletTweet(item);
+    } else if (selectedTemplateStyle === 'hype') {
+        return generateHypeTweet(item);
+    } else {
+        return generateProfessionalTweet(item);
+    }
+}
+
+function generateProfessionalTweet(item) {
     const category = item.category || 'General';
     const date = item.date;
     const link = item.link;
-    // Replace multiple spaces and newlines with a single space to get raw text
     const cleanText = item.content_text.replace(/\s+/g, ' ').trim();
     
-    // Compose Tweet Blueprint
     const header = `📢 BigQuery Update: ${category}\n`;
     const dateLine = `📅 ${date}\n\n`;
     const hashtags = `\n\n#BigQuery #GoogleCloud`;
     const linkLine = `\n\n${link}`;
     
-    // Calculate space for description
     const baseLength = header.length + dateLine.length + hashtags.length + linkLine.length;
     const maxDescLength = 280 - baseLength;
     
@@ -347,6 +364,75 @@ function generateDefaultTweet(item) {
     }
     
     return `${header}${dateLine}${description}${hashtags}${linkLine}`;
+}
+
+function generateBulletTweet(item) {
+    const category = item.category || 'General';
+    const link = item.link;
+    const cleanText = item.content_text.replace(/\s+/g, ' ').trim();
+    
+    // Split sentences roughly by periods followed by space, question marks, or exclamation marks
+    const sentences = cleanText.split(/[.!?]\s+/).map(s => s.trim()).filter(s => s.length > 0);
+    
+    const header = `📊 BigQuery [${category}]\n\n`;
+    const hashtags = `\n\n#CloudData #BigQuery`;
+    const linkLine = `\n${link}`;
+    
+    const baseLength = header.length + hashtags.length + linkLine.length;
+    const maxBulletsLength = 280 - baseLength;
+    
+    let bulletLines = [];
+    let currentLength = 0;
+    
+    for (let i = 0; i < sentences.length; i++) {
+        // Form a bullet sentence
+        const bullet = `• ${sentences[i]}${sentences[i].endsWith('.') ? '' : '.'}`;
+        if (currentLength + bullet.length + (bulletLines.length > 0 ? 1 : 0) <= maxBulletsLength) {
+            bulletLines.push(bullet);
+            currentLength += bullet.length + 1; // +1 for newline
+        } else {
+            if (bulletLines.length === 0) {
+                // Truncate the first bullet if it doesn't fit
+                const truncated = bullet.substring(0, maxBulletsLength - 4) + '...';
+                bulletLines.push(truncated);
+            }
+            break;
+        }
+    }
+    
+    const bulletsText = bulletLines.join('\n');
+    return `${header}${bulletsText}${hashtags}${linkLine}`;
+}
+
+function generateHypeTweet(item) {
+    const category = item.category || 'General';
+    const link = item.link;
+    const cleanText = item.content_text.replace(/\s+/g, ' ').trim();
+    
+    const emojiMap = {
+        'feature': '⚡ NEW FEATURE ALERT!',
+        'announcement': '📢 CRITICAL ANNOUNCEMENT!',
+        'issue': '⚠️ NOTICE / ISSUE:',
+        'fix': '🔧 FIX RELEASED!',
+        'deprecated': '🚫 DEPRECATED WARNING:',
+        'general': '💡 BIGQUERY UPDATE:'
+    };
+    const intro = emojiMap[category.toLowerCase()] || `⚡ BIGQUERY [${category}]:`;
+    
+    const header = `${intro}\n\n`;
+    const cta = `\n\nCheck out the docs 👇`;
+    const linkLine = `\n${link}`;
+    const hashtags = `\n#GoogleCloud #DataEngineering`;
+    
+    const baseLength = header.length + cta.length + linkLine.length + hashtags.length;
+    const maxDescLength = 280 - baseLength;
+    
+    let description = cleanText;
+    if (description.length > maxDescLength) {
+        description = description.substring(0, maxDescLength - 3) + '...';
+    }
+    
+    return `${header}${description}${cta}${linkLine}${hashtags}`;
 }
 
 function handleTextareaInput() {
@@ -679,6 +765,46 @@ function initEventListeners() {
                 closeComposer();
             }
         }
+    });
+
+    // Reset All Filters
+    const clearAllFiltersBtn = document.getElementById('clear-all-filters-btn');
+    if (clearAllFiltersBtn) {
+        clearAllFiltersBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchQuery = '';
+            clearSearchBtn.style.display = 'none';
+            
+            // Reset category filter
+            activeCategory = 'all';
+            document.querySelectorAll('.filter-pill').forEach(pill => {
+                pill.classList.remove('active');
+                if (pill.dataset.category === 'all') {
+                    pill.classList.add('active');
+                }
+            });
+            
+            applyFiltersAndRender();
+        });
+    }
+
+    // Template Button Selection
+    const templateButtons = document.querySelectorAll('.template-btn');
+    templateButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            templateButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedTemplateStyle = btn.dataset.style;
+            
+            // Re-generate tweet using current selected item
+            if (composerWorkspace.dataset.currentItem) {
+                const item = JSON.parse(composerWorkspace.dataset.currentItem);
+                const draftedText = generateDefaultTweet(item);
+                tweetTextarea.value = draftedText;
+                handleTextareaInput();
+                showToast(`Switched to ${btn.textContent} template`);
+            }
+        });
     });
 }
 
