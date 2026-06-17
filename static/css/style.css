@@ -166,7 +166,7 @@ body {
 
 .header-titles .subtitle {
     font-size: 13px;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .header-actions {
@@ -180,7 +180,7 @@ body {
     align-items: center;
     gap: 8px;
     font-size: 13px;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .status-icon {
