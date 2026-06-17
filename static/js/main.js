@@ -16,6 +16,8 @@ const clearSearchBtn = document.getElementById('clear-search-btn');
 const sortSelect = document.getElementById('sort-select');
 const categoryFilters = document.getElementById('category-filters');
 const feedItemsContainer = document.getElementById('feed-items');
+const themeToggleBtn = document.getElementById('theme-toggle');
+const exportCsvBtn = document.getElementById('export-csv-btn');
 
 // State Containers
 const loadingState = document.getElementById('loading-state');
@@ -204,14 +206,37 @@ function renderFeed() {
                         ${item.date}
                     </span>
                 </div>
-                <div class="card-tweet-indicator" title="Draft post about this">
-                    <i data-lucide="twitter" style="width: 14px; height: 14px;"></i>
+                <div class="card-header-actions">
+                    <button class="card-action-btn copy-btn" title="Copy raw update to clipboard">
+                        <i data-lucide="copy"></i>
+                    </button>
+                    <button class="card-action-btn tweet-btn" title="Draft tweet about this">
+                        <i data-lucide="twitter"></i>
+                    </button>
                 </div>
             </div>
             <div class="card-body">
                 ${item.content_html}
             </div>
         `;
+        
+        // Attach action handlers
+        const copyBtn = card.querySelector('.copy-btn');
+        copyBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent selecting card
+            navigator.clipboard.writeText(item.content_text)
+                .then(() => showToast('Update copied to clipboard!'))
+                .catch(err => {
+                    showToast('Failed to copy text', 'error');
+                    console.error(err);
+                });
+        });
+
+        const cardTweetBtn = card.querySelector('.tweet-btn');
+        cardTweetBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent duplicate card click event
+            selectReleaseNote(item);
+        });
         
         card.addEventListener('click', () => selectReleaseNote(item));
         feedItemsContainer.appendChild(card);
@@ -412,6 +437,85 @@ function showToast(message, type = 'success') {
 }
 
 /* ==========================================================================
+   Theme and Export Utility Functions
+   ========================================================================== */
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        updateThemeIcon('light');
+    } else {
+        document.body.classList.remove('light-theme');
+        updateThemeIcon('dark');
+    }
+}
+
+function updateThemeIcon(theme) {
+    const icon = themeToggleBtn.querySelector('.toggle-icon');
+    if (!icon) return;
+    if (theme === 'light') {
+        icon.setAttribute('data-lucide', 'moon');
+    } else {
+        icon.setAttribute('data-lucide', 'sun');
+    }
+    // Re-create icon on the button
+    lucide.createIcons();
+}
+
+function toggleTheme() {
+    if (document.body.classList.contains('light-theme')) {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('theme', 'dark');
+        updateThemeIcon('dark');
+        showToast('Switched to Dark Mode');
+    } else {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+        updateThemeIcon('light');
+        showToast('Switched to Light Mode');
+    }
+}
+
+function exportToCSV() {
+    if (filteredReleaseNotes.length === 0) {
+        showToast('No release notes available to export', 'error');
+        return;
+    }
+
+    const headers = ['Date', 'Category', 'Timestamp', 'Link', 'Content Text'];
+    
+    const rows = filteredReleaseNotes.map(item => [
+        item.date,
+        item.category,
+        item.timestamp,
+        item.link,
+        item.content_text.replace(/\s+/g, ' ').trim()
+    ]);
+    
+    const csvContent = [
+        headers.map(h => `"${h.replace(/"/g, '""')}"`).join(','),
+        ...rows.map(row => row.map(val => `"${val.replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    
+    let categoryName = activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1);
+    let searchSegment = searchQuery ? `_search_${searchQuery.replace(/[^a-zA-Z0-9]/g, '_')}` : '';
+    const filename = `bigquery_releases_${categoryName}${searchSegment}.csv`;
+    
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast(`Exported ${filteredReleaseNotes.length} updates to CSV!`);
+}
+
+/* ==========================================================================
    Event Listeners Setup
    ========================================================================== */
 function initEventListeners() {
@@ -517,10 +621,17 @@ function initEventListeners() {
             document.getElementById(`tab-${tabId}`).style.display = 'block';
         });
     });
+
+    // Theme Toggle
+    themeToggleBtn.addEventListener('click', toggleTheme);
+
+    // Export to CSV
+    exportCsvBtn.addEventListener('click', exportToCSV);
 }
 
 // Initializing the app
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     initEventListeners();
     fetchReleaseNotes(false); // First load checks cache
 });

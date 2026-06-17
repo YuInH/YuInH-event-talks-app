@@ -1206,3 +1206,125 @@ body {
         gap: 16px;
     }
 }
+
+/* ==========================================================================
+   Light Theme Override Variables
+   ========================================================================== */
+body.light-theme {
+    --bg-base: #f1f5f9;
+    --bg-surface: #ffffff;
+    --bg-surface-hover: #f8fafc;
+    --bg-surface-active: #f1f5f9;
+    
+    --border-color: rgba(15, 23, 42, 0.08);
+    --border-hover: rgba(15, 23, 42, 0.15);
+    --border-active: rgba(59, 130, 246, 0.5);
+    
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    
+    --accent-blue-glow: rgba(59, 130, 246, 0.08);
+    --accent-purple-glow: rgba(168, 85, 247, 0.08);
+    --accent-green-glow: rgba(16, 185, 129, 0.08);
+    --accent-orange-glow: rgba(245, 158, 11, 0.08);
+    --accent-red-glow: rgba(239, 68, 68, 0.08);
+    
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.03) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.03) 0px, transparent 50%);
+}
+
+body.light-theme .composer-card.empty {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+body.light-theme .composer-placeholder-graphic {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* ==========================================================================
+   Header Theme Toggle Styles
+   ========================================================================== */
+.btn-icon-only {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.btn-icon-only:hover {
+    background: var(--bg-surface-hover);
+    border-color: var(--border-hover);
+    color: var(--accent-blue);
+    transform: translateY(-1px);
+}
+
+.btn-icon-only:active {
+    transform: translateY(0);
+}
+
+.toggle-icon {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-icon-only:hover .toggle-icon {
+    transform: rotate(30deg);
+}
+
+/* ==========================================================================
+   Card Header Actions
+   ========================================================================== */
+.card-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.card-action-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--border-color);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.card-action-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+}
+
+body.light-theme .card-action-btn:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.card-action-btn.copy-btn:hover {
+    color: var(--accent-green);
+    background: var(--bg-fix);
+}
+
+.card-action-btn.tweet-btn:hover {
+    color: #1d9bf0;
+    background: rgba(29, 155, 240, 0.1);
+}
+
+.card-action-btn i, .card-action-btn svg {
+    width: 12px;
+    height: 12px;
+}
+
