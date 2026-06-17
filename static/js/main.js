@@ -225,7 +225,23 @@ function renderFeed() {
         copyBtn.addEventListener('click', (e) => {
             e.stopPropagation(); // Prevent selecting card
             navigator.clipboard.writeText(item.content_text)
-                .then(() => showToast('Update copied to clipboard!'))
+                .then(() => {
+                    showToast('Update copied to clipboard!');
+                    
+                    // Local icon feedback
+                    const iconEl = copyBtn.querySelector('i') || copyBtn.querySelector('svg');
+                    if (iconEl) {
+                        iconEl.setAttribute('data-lucide', 'check');
+                        copyBtn.classList.add('copied');
+                        lucide.createIcons();
+                        
+                        setTimeout(() => {
+                            iconEl.setAttribute('data-lucide', 'copy');
+                            copyBtn.classList.remove('copied');
+                            lucide.createIcons();
+                        }, 1500);
+                    }
+                })
                 .catch(err => {
                     showToast('Failed to copy text', 'error');
                     console.error(err);
@@ -589,7 +605,23 @@ function initEventListeners() {
     copyTweetBtn.addEventListener('click', () => {
         const text = tweetTextarea.value;
         navigator.clipboard.writeText(text)
-            .then(() => showToast('Tweet copied to clipboard!'))
+            .then(() => {
+                showToast('Tweet copied to clipboard!');
+                
+                // Local button feedback
+                const iconEl = copyTweetBtn.querySelector('i') || copyTweetBtn.querySelector('svg');
+                if (iconEl) {
+                    iconEl.setAttribute('data-lucide', 'check');
+                    copyTweetBtn.classList.add('copied');
+                    lucide.createIcons();
+                    
+                    setTimeout(() => {
+                        iconEl.setAttribute('data-lucide', 'copy');
+                        copyTweetBtn.classList.remove('copied');
+                        lucide.createIcons();
+                    }, 1500);
+                }
+            })
             .catch(err => {
                 showToast('Failed to copy text', 'error');
                 console.error(err);
@@ -627,6 +659,27 @@ function initEventListeners() {
 
     // Export to CSV
     exportCsvBtn.addEventListener('click', exportToCSV);
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+        // Focus search when pressing '/' (unless typing in inputs/textareas)
+        if (e.key === '/' && document.activeElement !== searchInput && document.activeElement !== tweetTextarea) {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+        }
+        
+        // Escape to dismiss focus or close active panels
+        if (e.key === 'Escape') {
+            if (document.activeElement === searchInput) {
+                searchInput.blur();
+            } else if (document.activeElement === tweetTextarea) {
+                tweetTextarea.blur();
+            } else if (selectedItemId) {
+                closeComposer();
+            }
+        }
+    });
 }
 
 // Initializing the app

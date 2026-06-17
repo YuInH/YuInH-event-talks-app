@@ -1328,3 +1328,14 @@ body.light-theme .card-action-btn:hover {
     height: 12px;
 }
 
+.card-action-btn.copy-btn.copied {
+    color: var(--accent-green) !important;
+    background: var(--bg-fix) !important;
+    border-color: var(--accent-green) !important;
+}
+
+#copy-tweet-btn.copied {
+    background: var(--bg-fix) !important;
+    color: var(--accent-green) !important;
+    border-color: var(--accent-green) !important;
+}
